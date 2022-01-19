@@ -1,8 +1,14 @@
 import pandas as pd
 import streamlit as st
 import Scrapper
+import pickle
+import sklearn
 
+#with open('/Users/paulmontecotgrall/Downloads/HistBoost.sav') as f:
+f = open('/Users/paulmontecotgrall/Downloads/HistBoost.sav', 'rb')
+model = pickle.load(f)
 
+print(model)
 URL = "https://www.google.com/search?lr=lang_en&ie=UTF-8&q=weather"
 region = "Boston"#args.region
 URL += region
@@ -56,6 +62,54 @@ st.sidebar.write(" Precipitation:{}".format(data["precipitation"]))
 st.sidebar.write(" Humidity:{}".format(data["humidity"]))
 st.sidebar.write(" Wind:{}".format(data["wind"]))
 
+humidity = data["humidity"][:-1]
+precip = data["precipitation"][:-1]
+wind = data["wind"].split(" ")
+day = data["dayhour"].split(" ")
+hour = day[1].split(':')
+
+print(humidity)
+print(precip)
+print(wind)
+
+to_pred = {"timestamp":1.543708e+09,"hour": hour[0], "day": 16,
+           "source": origin,"destination": destination, "cab_type":cab_type,"name":cab_pricing,
+           "distance":distance,"latitude":42.2148,"longitude":-71.0330,"temperature":data['temp_now'],
+           "humidity":humidity,"windSpeed":wind[0], "icon":meteo_description ,"surge_multiplier":rate,
+           "long_summary":long_summary,"datetime":'Sunday',"precipIntensity":precip}
+to_pred = pd.DataFrame.from_records([to_pred])
+print(to_pred)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+categorical_columns = ['source', 'destination', 'cab_type', 'name', 'icon', 'long_summary', 'datetime']
+numerical_columns = ['timestamp', 'hour', 'day', 'distance', 'latitude', 'longitude', 'temperature', 'humidity',
+                     'windSpeed', 'surge_multiplier', 'precipIntensity']
+# numerical_columns = ['timestamp', 'hour', 'day', 'distance', 'latitude', 'longitude', 'temperature', 'humidity', 'windSpeed','surge_multiplier']
+# numerical_columns = ['hour', 'day', 'distance', 'latitude', 'longitude', 'temperature', 'humidity', 'windSpeed']
+to_pred = pd.get_dummies(to_pred, columns=categorical_columns)
+print(to_pred)
+#Q1 = to_pred[numerical_columns].quantile(0.25)
+#Q3 = to_pred[numerical_columns].quantile(0.75)
+#IQR = Q3 - Q1
+
+# features = features[~((features[numerical_columns] < (Q1 - 1.5 * IQR)) |(features[numerical_columns] > (Q3 + 1.5 * IQR))).any(axis=1)]
+
+
+
+#for i in numerical_columns:
+    # fit on training data column
+    #scale = StandardScaler().fit(to_pred[[i]])
+
+    # transform the training data column
+    #to_pred[i] = scale.transform(to_pred[[i]])
+print(to_pred)
+st.write(to_pred)
+
+
+if st.button('PREDICT'):
+    price = model.predict(to_pred)
+    st.write('The price will be {}'.format(price))
 
 
 
