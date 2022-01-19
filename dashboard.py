@@ -104,7 +104,7 @@ print(to_pred)
     # transform the training data column
     #to_pred[i] = scale.transform(to_pred[[i]])
 print(to_pred)
-st.write(to_pred)
+#st.write(to_pred)
 
 
 if st.button('PREDICT'):
