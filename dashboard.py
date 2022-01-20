@@ -71,14 +71,16 @@ hour = day[1].split(':')
 print(humidity)
 print(precip)
 print(wind)
-
+print(df)
+df = df[['timestamp', 'hour', 'day', 'source','destination','cab_type','name','distance',
+         'latitude','longitude','temperature','humidity','windSpeed','icon','surge_multiplier',
+         'long_summary','datetime','precipIntensity']]
 to_pred = {"timestamp":1.543708e+09,"hour": hour[0], "day": 16,
            "source": origin,"destination": destination, "cab_type":cab_type,"name":cab_pricing,
            "distance":distance,"latitude":42.2148,"longitude":-71.0330,"temperature":data['temp_now'],
            "humidity":humidity,"windSpeed":wind[0], "icon":meteo_description ,"surge_multiplier":rate,
            "long_summary":long_summary,"datetime":'Sunday',"precipIntensity":precip}
-to_pred = pd.DataFrame.from_records([to_pred])
-print(to_pred)
+#f = pd.DataFrame.from_records([df])
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -87,8 +89,10 @@ numerical_columns = ['timestamp', 'hour', 'day', 'distance', 'latitude', 'longit
                      'windSpeed', 'surge_multiplier', 'precipIntensity']
 # numerical_columns = ['timestamp', 'hour', 'day', 'distance', 'latitude', 'longitude', 'temperature', 'humidity', 'windSpeed','surge_multiplier']
 # numerical_columns = ['hour', 'day', 'distance', 'latitude', 'longitude', 'temperature', 'humidity', 'windSpeed']
-to_pred = pd.get_dummies(to_pred, columns=categorical_columns)
-print(to_pred)
+from sklearn.preprocessing import OneHotEncoder
+#y = OneHotEncoder().fit_transform(to_pred)
+df = pd.get_dummies(df, columns=categorical_columns)
+print(df)
 #Q1 = to_pred[numerical_columns].quantile(0.25)
 #Q3 = to_pred[numerical_columns].quantile(0.75)
 #IQR = Q3 - Q1
